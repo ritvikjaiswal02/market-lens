@@ -1,47 +1,96 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../services/api";
 import { useAuth } from "../context/useAuth";
 
-import { useNavigate } from "react-router-dom";
-
 export default function Login() {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
-      await login(email, password);
+      const res = await api.post("/auth/login", { email, password });
+      login(res.data.token);
       navigate("/dashboard");
-    } catch {
-      alert("Invalid credentials");
+    } catch  {
+      setError("Invalid email or password");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="p-6 max-w-sm w-full border">
-        <h2 className="text-xl mb-4 text-center">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-950 via-slate-900 to-zinc-900 text-white px-4">
+      <div className="w-full max-w-md bg-zinc-900/70 backdrop-blur border border-zinc-800 rounded-2xl p-8 shadow-xl">
+        {/* Header */}
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Welcome back to Market Lens
+          </h1>
+          <p className="text-sm text-zinc-400 mt-1">
+            Sign in to your market dashboard
+          </p>
+        </div>
 
-        <input
-          className="border p-2 w-full mb-2"
-          type="email"
-          placeholder="Email"
-          required
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {/* Error */}
+        {error && (
+          <div className="mb-4 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2">
+            {error}
+          </div>
+        )}
 
-        <input
-          className="border p-2 w-full mb-4"
-          type="password"
-          placeholder="Password"
-          required
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1">Email</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              placeholder="you@example.com"
+            />
+          </div>
 
-        <button className="bg-green-500 text-white p-2 w-full">Login</button>
-      </form>
+          <div>
+            <label className="block text-sm text-zinc-400 mb-1">Password</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-2 bg-teal-500 hover:bg-teal-400 disabled:opacity-60 text-zinc-900 font-medium rounded-lg py-2 transition"
+          >
+            {loading ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <p className="text-sm text-zinc-400 text-center mt-6">
+          Don’t have an account?{" "}
+          <Link to="/register" className="text-teal-400 hover:text-teal-300">
+            Create one
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

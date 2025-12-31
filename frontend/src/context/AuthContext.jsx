@@ -1,25 +1,48 @@
-import { createContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import api from "../services/api";
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Run once on app load
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      setUser({ token }); // minimal user object for routing
+    }
+
+    setLoading(false);
+  }, []);
 
   const login = async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
+
     localStorage.setItem("token", res.data.token);
-    setToken(res.data.token);
+    setUser({ token: res.data.token });
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    setToken(null);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
+
+// Optional helper hook
+export const useAuth = () => useContext(AuthContext);
