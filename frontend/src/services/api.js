@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+   baseURL: "https://market-lens-backend.onrender.com/api",
 });
 
 // Automatically attach JWT token to every request
