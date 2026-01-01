@@ -4,6 +4,53 @@ const axios = require("axios");
 const router = express.Router();
 
 const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
+// 🌍 Global market stats
+router.get("/global", async (req, res) => {
+  try {
+    const response = await axios.get(`${COINGECKO_BASE}/global`, {
+      timeout: 5000,
+    });
+
+    res.json(response.data.data);
+  } catch (err) {
+    console.error("Global stats failed:", err.response?.status);
+    res.status(500).json({ error: "Failed to fetch global stats" });
+  }
+});
+// 🥇 Top coins for dashboard
+router.get("/top", async (req, res) => {
+  try {
+    const response = await axios.get(`${COINGECKO_BASE}/coins/markets`, {
+      params: {
+        vs_currency: "usd",
+        order: "market_cap_desc",
+        per_page: 10,
+        page: 1,
+        sparkline: true,
+        price_change_percentage: "24h",
+      },
+      timeout: 5000,
+    });
+
+    res.json(response.data);
+  } catch (err) {
+    console.error("Top coins failed:", err.response?.status);
+    res.status(500).json({ error: "Failed to fetch top coins" });
+  }
+});
+// 🔥 Trending coins
+router.get("/trending", async (req, res) => {
+  try {
+    const response = await axios.get(`${COINGECKO_BASE}/search/trending`, {
+      timeout: 5000,
+    });
+
+    res.json(response.data.coins.map(c => c.item));
+  } catch (err) {
+    console.error("Trending failed:", err.response?.status);
+    res.status(500).json({ error: "Failed to fetch trending coins" });
+  }
+});
 
 // 🔍 Search coins
 router.get("/search", async (req, res) => {

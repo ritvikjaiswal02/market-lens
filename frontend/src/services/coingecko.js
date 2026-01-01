@@ -1,19 +1,27 @@
 import api from "./api";
 
-// Search coins (via backend)
-export const searchCoins = async (query) => {
-  if (!query) return [];
-  const res = await api.get("/market/search", {
-    params: { query },
-  });
+// 🌍 Global market stats
+export const getGlobalStats = async () => {
+  const res = await api.get("/market/global");
   return res.data;
 };
 
-// Get market prices (via backend)
-export const getMarketData = async (coinIds) => {
-  if (!coinIds.length) return [];
-  const res = await api.get("/market/prices", {
-    params: { ids: coinIds.join(",") },
+// 🥇 Top coins for dashboard cards
+export const getTopCoins = async () => {
+  const res = await api.get("/market/top");
+  return res.data;
+};
+
+// 🔥 Trending coins
+export const getTrending = async () => {
+  const res = await api.get("/market/trending");
+  return res.data;
+};
+
+// 📊 Price history (chart)
+export const getHistory = async (coinId, days = 7) => {
+  const res = await api.get(`/market/history/${coinId}`, {
+    params: { days },
   });
   return res.data;
 };
